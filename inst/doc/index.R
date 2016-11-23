@@ -9,6 +9,9 @@ knitr::opts_chunk$set(
 )
 
 ## ----eval=FALSE----------------------------------------------------------
+#  install.packages("gridsampler")
+
+## ----eval=FALSE----------------------------------------------------------
 #  library(devtools)
 #  install_github("gridsampler/markheckmann")
 

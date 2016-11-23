@@ -3,6 +3,7 @@ library(shiny)
 library(ggplot2)
 library(gridsampler)
 library(shinythemes)
+library(shinyBS)
 
 #### UI variables defined here for convenience ####
 # Current gridsampler version (displayed in header)
@@ -89,14 +90,16 @@ default_attributes_norm_mean <- 6
 default_attributes_norm_sd   <- 1
 default_attributes_lambda    <- 6
 default_attributes_exp_rate  <- 0.1
-default_attributes_probs     <- round(dnorm(default_attributes,
+default_attributes_probs     <- dnorm(default_attributes,
                                       mean = default_attributes_norm_mean,
-                                      sd = default_attributes_norm_sd), 3)
+                                      sd = default_attributes_norm_sd)
+default_attributes_probs     <- default_attributes_probs / sum(default_attributes_probs)
 default_category_count       <- 15
 default_category_exp_rate    <- 0.15
 default_category_lin_min     <- 0.001
-default_category_probs       <- round(dexp(seq_len(default_category_count),
-                                           rate = default_category_exp_rate), 3)
+default_category_probs       <- dexp(seq_len(default_category_count),
+                                           rate = default_category_exp_rate)
+default_category_probs       <- default_category_probs / sum(default_category_probs)
 
 # Creating the reactive values object to store attributes, probs etc
 values                 <- reactiveValues()
@@ -122,3 +125,6 @@ p_31 <- gridsampler::draw_n_person_sample(prob = default_category_probs,
           theme(plot.background  = element_rect(fill = plot_bg),
                 panel.background = element_rect(fill = panel_bg))
 
+#### Tooltips ####
+# See tooltip options: http://www.w3schools.com/bootstrap/bootstrap_ref_js_tooltip.asp
+tooltip_opts <- list(delay = list(show = 1000, hide = 100))

@@ -48,7 +48,8 @@ shinyUI(navbarPage(title = gridsampler_version,
               fluidRow(
                 column(6, numericInput("attribute_num", "No. of Attributes",
                                     value = default_attributes_min,
-                                    min = default_attributes_min, max = default_attributes_max, step = 1, width = "100%")
+                                    min = default_attributes_min,
+                                    max = default_attributes_max, step = 1, width = "100%")
                 ),
                 column(6, numericInput("probability1", "Probability",
                                     value = round(default_attributes_probs[1], 3),
@@ -86,7 +87,7 @@ shinyUI(navbarPage(title = gridsampler_version,
                 ),
                 fluidRow(
                   # Action button in column 1
-                  column(12, actionButton("preset_go1", "Apply Preset", width = "100%"))
+                  column(12, actionButton("preset_go1", "Apply to Attribute Distribution", width = "100%"))
                 )
               ) # wellPanel ends here
         ),
@@ -138,7 +139,7 @@ shinyUI(navbarPage(title = gridsampler_version,
                  ),
                  fluidRow(
                    # Action button in column 2
-                   column(12, actionButton("preset_go2", "Apply Preset", width = "100%"))
+                   column(12, actionButton("preset_go2", "Apply to Category Distribution", width = "100%"))
                  )
                ) # wellPanel ends here
          ),
@@ -149,12 +150,12 @@ shinyUI(navbarPage(title = gridsampler_version,
                desc_col3,
                # UI controls in panel 3, top
                fluidRow(
-                 column(6, numericInput("sample_size", "Sample Size (N)", value = "100")),
-                 column(6, numericInput("run_times", "Simulation Runs (R)", value = "10"))
+                 column(6, numericInput("sample_size", "Sample Size (N)", value = "50")),
+                 column(6, numericInput("run_times", "Simulation Runs (R)", value = "1000"))
                ),
                fluidRow(
-                 column(6, actionButton("sample_random", "Random Sample", width = "100%")),
-                 column(6, actionButton("run_button", "Run", width = "100%"))
+                 column(6, actionButton("sample_random", "One Random Sample of Size N", width = "100%")),
+                 column(6, actionButton("run_button", "R Random Samples of Size N", width = "100%"))
                ),
                tags$br(),
                # Plot in panel 1, top
@@ -164,11 +165,11 @@ shinyUI(navbarPage(title = gridsampler_version,
                  # Panel 3 bottom input controls, left side
                  column(6,
                  wellPanel(
-                   fluidRow(column(12, textInput("sample_size2", "Sample Size (N)",
+                   fluidRow(column(12, textInput("sample_size2", "Range of Sample Sizes (N)",
                                                  value = "10, 20, 30, 40, 50, 60, 70, 80"))),
-                   fluidRow(column(12, numericInput("runs_per_sample", "Simulation Runs (R)",
-                                                    value = 100, step = 1))),
-                   fluidRow(column(12, actionButton("simulate", "Simulate", width = "100%"))
+                   fluidRow(column(12, numericInput("runs_per_sample", "Simulation Runs (R) per Sample Size (N)",
+                                                    value = 1000, step = 1))),
+                   fluidRow(column(12, actionButton("simulate", "Simulate R Samples for Each N", width = "100%"))
                  ))),
                  # Panel 3 bottom input controls, right side
                  column(6,
@@ -177,7 +178,7 @@ shinyUI(navbarPage(title = gridsampler_version,
                                                  value = "4, 5, 6"))),
                    fluidRow(column(12, textInput("proportion_k", "Coverage (C)",
                                                  value = "0.9, 0.95, 1"))),
-                   fluidRow(column(12, actionButton("redraw", "Redraw", width = "100%"))
+                   fluidRow(column(12, actionButton("redraw", "Redraw with New Settings", width = "100%"))
                  )))
                ),
                tags$br(),
@@ -190,7 +191,20 @@ shinyUI(navbarPage(title = gridsampler_version,
                tags$br()
          )
         #### End of column 3 ####
-      ))
+      )),
+      #### Tolltip definitions ####
+      bsTooltip("preset_go1", options = tooltip_opts,
+                title = "Use the selected preset probability distribution as the distribution of the ‘Number of Attributes‘ above"),
+      bsTooltip("preset_go2", options = tooltip_opts,
+                title = "Use the selected preset probability distribution as the distribution of the ‘Probability of Categories‘ above"),
+      bsTooltip("sample_random", options = tooltip_opts,
+                title = "Draw a single random sample of size N, i.e., simulate the results of N repertory grid interviews."),
+      bsTooltip("run_button", options = tooltip_opts,
+                title = "Draw R random samples of size N. Repeats the process of simulating the results of N repertory grid interviews R times and displays aggregated results."),
+      bsTooltip("simulate", options = tooltip_opts,
+                title = "Main simulation: Draw R random samples for each specified N. This is the same simulation as above, but conducted for many different N."),
+      bsTooltip("redraw", options = tooltip_opts,
+                title = "Draw a plot which shows the probabilities of obtaining C % of the categories with at least M attributes each. Show for all specified samples sizes N.")
     ), # End of first tabPanel, "Simulate" tab
 
   #### About tab ####

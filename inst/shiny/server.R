@@ -3,7 +3,6 @@ source("global.R")
 #### Shiny server file ####
 shinyServer(function(input, output, session) {
 
-
   #### Logic for column 1 ####
 
   # Input validation
@@ -75,7 +74,26 @@ shinyServer(function(input, output, session) {
 
   # Observer for manual probability adjustments (col 1)
   observeEvent(input$probability1, {
-    values$attributes_prob[values$attributes_id == input$attribute_num] <- round(input$probability1, 3)
+    # Prevent probability inputs from going above 1
+    if (!is.na(input$probability1)) {
+      if (isolate(input$probability1) > 1) {
+        updateNumericInput(session, "probability1", value = 1)
+      }
+    }
+
+    input_prob <- round(input$probability1, 3)
+
+    # Change selected probability
+    values$attributes_prob[values$attributes_id == input$attribute_num] <- input_prob
+
+    # Scale probabilities back to 1
+    # Different approach: scale non-selected probs to 1 - (selected prob)
+    if (round(sum(values$attributes_prob), 4) != 1) {
+      other_probs <- values$attributes_prob[values$attributes_id != input$attribute_num]
+      other_probs <- other_probs / (sum(other_probs)/(1 - input_prob))
+
+      values$attributes_prob[values$attributes_id != input$attribute_num] <- other_probs
+    }
   })
 
   # Observer for presets in column 1
@@ -92,6 +110,13 @@ shinyServer(function(input, output, session) {
         values$attributes_prob <- dunif(values$attributes_id, min = input$minimum1 - 1, max = input$maximum1)
       }
     }
+
+    # Adjust scaling
+    values$attributes_prob <- values$attributes_prob/sum(values$attributes_prob)
+
+    # Update manual probability input
+    updateNumericInput(session, "probability1",
+                       value = round(values$attributes_prob[values$attributes_id == input$attribute_num], 3))
   })
 
   # Plot in column 1
@@ -146,7 +171,7 @@ shinyServer(function(input, output, session) {
   # Make sure the probability in column 2 is the current value stored in the reactiveValues object
   observeEvent(input$category, {
     updateNumericInput(session, "probability2",
-                       value = values$category_prob[values$category_id == input$category])
+                       value = round(values$category_prob[values$category_id == input$category], 3))
   })
 
   # Observer to change category properties
@@ -167,7 +192,25 @@ shinyServer(function(input, output, session) {
 
   # Observer for manual probability adjustments (col 2)
   observeEvent(input$probability2, {
-    values$category_prob[values$category_id == input$category] <- round(input$probability2, 3)
+    if (!is.na(input$probability2)) {
+      if (isolate(input$probability2) > 1) {
+        updateNumericInput(session, "probability2", value = 1)
+      }
+    }
+
+    input_prob <- round(input$probability2, 3)
+
+    # Change selected probability
+    values$category_prob[values$category_id == input$category] <- input_prob
+
+    # Scale probs back to 1
+    # Different approach: scale non-selected probs to 1 - (selected prob)
+    if (round(sum(values$category_prob), 4) != 1) {
+      other_probs <- values$category_prob[values$category_id != input$category]
+      other_probs <- other_probs / (sum(other_probs)/(1 - input_prob))
+
+      values$category_prob[values$category_id != input$category] <- other_probs
+    }
   })
 
   # Observer for presets in column 2
@@ -180,6 +223,13 @@ shinyServer(function(input, output, session) {
     } else if (input$preset_types2 == "Linear") {
       values$category_prob <- p_linear(k = length(values$category_id), p_k = input$`2_lin_min`)
     }
+
+    # Adjust scaling
+    values$category_prob <- values$category_prob/sum(values$category_prob)
+
+    # Update manual probability input field
+    updateNumericInput(session, "probability2",
+                       value = round(values$category_prob[values$category_id == input$category], 3))
   })
 
   # Plot for column 2
@@ -259,8 +309,12 @@ shinyServer(function(input, output, session) {
       if (times < 0) {times <- abs(times)}
 
       r <- plyr::ldply(seq_len_robust(times), function(x){
-                                  setProgress(session = session, value = x/times,
-                                               detail = paste0(x, "/", times))
+                                  if (x%%10 == 0) {
+                                    # Only update progress bar every 10 iterations to reudce lag
+                                    setProgress(session = session, value = x/times,
+                                                detail = paste0(x, "/", times))
+                                  }
+
                                   samples <- sim_n_persons(prob = isolate(values$category_prob),
                                                            n = isolate(input$sample_size),
                                                            a = isolate(values$attributes_id),
@@ -300,9 +354,12 @@ shinyServer(function(input, output, session) {
       r <- list()
       n <- text_to_vector(isolate(input$sample_size2))
       # Insert default values in n is nonsense
-      if (n == 0) {
-        n <- seq(10, 80, 10)
+      if (length(n) == 1){
+        if (n == 0) {
+          n <- seq(10, 80, 10)
+        }
       }
+
       for (i in seq_along(n)) {
         # Increment progress bar
         incProgress(amount = 1/length(n), detail = paste0(i, "/", length(n)))
@@ -334,9 +391,12 @@ shinyServer(function(input, output, session) {
     # Use isolate() to avoid unwanted re-execution on input change
     N <- text_to_vector(isolate(input$sample_size2))
     # Insert default values in n is nonsense
-    if (N == 0) {
-      N <- seq(10, 80, 10)
+    if (length(N) == 1){
+      if (N == 0) {
+        N <- seq(10, 80, 10)
+      }
     }
+
     M <- text_to_vector(isolate(input$mincount_m))
     p <- text_to_vector(isolate(input$proportion_k))
 

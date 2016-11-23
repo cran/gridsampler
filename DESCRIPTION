@@ -10,9 +10,10 @@ Description: Simulation tool to facilitate determination of
     required sample size to achieve category saturation
     for studies using multiple repertory grids in conjunction with
     content analysis.
-Version: 0.5
-Date: 2016-09-02
-Imports: shiny, ggplot2, reshape2, plyr, shinythemes, BiasedUrn
+Version: 0.6
+Date: 2016-11-23
+Imports: shiny, ggplot2, reshape2, plyr, shinythemes, BiasedUrn,
+        shinyBS
 Suggests: knitr, testthat, rmarkdown
 Encoding: UTF-8
 URL: https://github.com/markheckmann/gridsampler
@@ -20,9 +21,9 @@ BugReports: https://github.com/markheckmann/gridsampler/issues
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
 NeedsCompilation: no
-Packaged: 2016-09-03 20:36:05 UTC; mark
+Packaged: 2016-11-23 14:57:38 UTC; mark
 Author: Mark Heckmann [aut, cre],
   Lukas Burk [aut]
 Maintainer: Mark Heckmann <heckmann.mark@gmail.com>
 Repository: CRAN
-Date/Publication: 2016-09-03 23:50:28
+Date/Publication: 2016-11-23 17:24:13
